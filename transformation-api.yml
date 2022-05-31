@@ -1,0 +1,42 @@
+ignore: [ ".DS_Store", ".git/",".idea/", ".tmp/", "dist/", "go-archetype","transformations.yml" ]
+
+before:
+  operations:
+    - sh:
+        - echo "begin generate project {{ .project }}, from {{ .source }} to {{ .destination }}"
+
+after:
+  operations:
+    - sh:
+        - echo "done generate project {{ .project }}, from {{ .source }} to {{ .destination }}"
+        - cd {{ .destination }} && go mod tidy && go test ./...
+
+inputs:
+  - id: pkg
+    text: What is the pkg name? (.e.g github.com/qxsugar/pkg
+    type: text
+
+transformations:
+  - name: replace pkg
+    type: replace
+    pattern: "api-pkg"
+    replacement: "{{ .pkg }}"
+    files: [ "**" ]
+
+  - name: replace project
+    type: replace
+    pattern: "api-project"
+    replacement: "{{ .destination }}"
+    files: [ "**" ]
+
+#  - name: rename cmd
+#    type: rename
+#    pattern: "cmd"
+#    replacement: "cmd"
+#    files: [ "**" ]
+
+  - name: do not include template code in the final output
+    type: include
+    region_marker: __DO_NOT_INCLUDE__
+    condition: false
+    files: [ "**" ]

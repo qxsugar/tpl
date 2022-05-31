@@ -1,0 +1,98 @@
+kind: pipeline
+type: docker
+name: api-project
+workspace:
+  base: /data/drone
+  path: api-project
+
+trigger:
+  branch:
+    - master
+  event:
+    - push
+
+clone:
+  depth: 1
+
+steps:
+  - name: test
+    image: golang
+    volumes:
+      - name: go-build-cache
+        path: /go/go-build
+      - name: go-pkg-cache
+        path: /go/pkg
+    environment:
+      GOCACHE: /go/go-build
+    commands:
+      - go mod tidy
+      - go test
+
+  - name: build-app
+    image: golang
+    volumes:
+      - name: go-build-cache
+        path: /go/go-build
+      - name: go-pkg-cache
+        path: /go/pkg
+    environment:
+      GOCACHE: /go/go-build
+    commands:
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app
+
+  - name: build-image
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker-user
+      password:
+        from_secret: docker-password
+      repo: ccr.ccs.tencentyun.com/wwww/api-project
+      tags:
+        - ${DRONE_BUILD_CREATED}
+        - latest
+      dockerfile: ./Dockerfile
+      registry: https://ccr.ccs.tencentyun.com
+
+  - name: deploy-api
+    image: appleboy/drone-ssh
+    settings:
+      host:
+        from_secret: ssh-host
+      username:
+        from_secret: ssh-user
+      password:
+        from_secret: ssh-password
+      script:
+        - kubectl set image deploy app-api-project app=ccr.ccs.tencentyun.com/wwww/api-project:${DRONE_BUILD_CREATED} --namespace magic
+
+  - name: notify success
+    image: kaynewang/drone-wechat-robot
+    settings:
+      msgtype: markdown
+      key: "0acbfd67-a932-4af3-8da7-f198efe2972b"
+      content: "### 部署通知\n> REPO: ${DRONE_REPO_NAME}\n> AUTHOR: ${DRONE_COMMIT_AUTHOR}\n> TAG: ${DRONE_BUILD_CREATED}\n> STATUS: 部署成功"
+    when:
+      status:
+        - success
+
+  - name: notify failure
+    image: kaynewang/drone-wechat-robot
+    settings: 
+      msgtype: markdown
+      key: "0acbfd67-a932-4af3-8da7-f198efe2972b"
+      content: "### 部署通知\n> REPO: ${DRONE_REPO_NAME}\n> AUTHOR: ${DRONE_COMMIT_AUTHOR}\n> TAG: ${DRONE_BUILD_CREATED}\n> STATUS: 构建失败"
+    when:
+      status:
+        - failure
+
+# 挂载的目录
+# 缓存go-build($GOCACHE)路径
+# 缓存go-pkg目录
+volumes:
+  - name: go-build-cache
+    host:
+      path: /tmp/cache/go/go-build
+  - name: go-pkg-cache
+    host:
+      path: /tmp/cache/go/pkg

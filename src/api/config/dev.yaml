@@ -1,0 +1,7 @@
+database:
+  default: "$user:$password@($host)/$db?charset=utf8mb4&parseTime=True&loc=Local"
+
+redis:
+  address: "$host:6379"
+  password: "$pwd"
+  db: 0
