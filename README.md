@@ -1,2 +1,5 @@
-# project_template
-项目模板仓库
+project template
+========
+
+### create project
+> bash <(curl -sL https://raw.githubusercontent.com/qxsugar/tpl/master/install.sh) $projectName
