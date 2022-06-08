@@ -70,7 +70,7 @@ steps:
     image: kaynewang/drone-wechat-robot
     settings:
       msgtype: markdown
-      key: "0acbfd67-a932-4af3-8da7-f198efe2972b"
+      key: "c10e1711-aec4-476f-9d8a-badfb4b2d3df"
       content: "### 部署通知\n> REPO: ${DRONE_REPO_NAME}\n> AUTHOR: ${DRONE_COMMIT_AUTHOR}\n> TAG: ${DRONE_BUILD_CREATED}\n> STATUS: 部署成功"
     when:
       status:
@@ -80,7 +80,7 @@ steps:
     image: kaynewang/drone-wechat-robot
     settings: 
       msgtype: markdown
-      key: "0acbfd67-a932-4af3-8da7-f198efe2972b"
+      key: "c10e1711-aec4-476f-9d8a-badfb4b2d3df"
       content: "### 部署通知\n> REPO: ${DRONE_REPO_NAME}\n> AUTHOR: ${DRONE_COMMIT_AUTHOR}\n> TAG: ${DRONE_BUILD_CREATED}\n> STATUS: 构建失败"
     when:
       status:
