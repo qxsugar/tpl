@@ -66,25 +66,24 @@ steps:
       script:
         - kubectl set image deploy app-api-project app=ccr.ccs.tencentyun.com/wwww/api-project:${DRONE_BUILD_CREATED} --namespace magic
 
-  - name: notify success
+  - name: notify
     image: kaynewang/drone-wechat-robot
     settings:
       msgtype: markdown
       key: "c10e1711-aec4-476f-9d8a-badfb4b2d3df"
-      content: "### 部署通知\n> REPO: ${DRONE_REPO_NAME}\n> AUTHOR: ${DRONE_COMMIT_AUTHOR}\n> TAG: ${DRONE_BUILD_CREATED}\n> STATUS: 部署成功"
+      content: |
+        ### 部署通知
+        > 仓库名字: ${DRONE_REPO_NAME}
+        > 提交作者: ${DRONE_COMMIT_AUTHOR}
+        > 提交记录: ${DRONE_COMMIT_MESSAGE}
+        > 提交链接: ${DRONE_COMMIT_LINK}
+        > 构建标签: ${DRONE_BUILD_CREATED}
+        > 构建状态: ${DRONE_BUILD_STATUS}
     when:
       status:
         - success
-
-  - name: notify failure
-    image: kaynewang/drone-wechat-robot
-    settings: 
-      msgtype: markdown
-      key: "c10e1711-aec4-476f-9d8a-badfb4b2d3df"
-      content: "### 部署通知\n> REPO: ${DRONE_REPO_NAME}\n> AUTHOR: ${DRONE_COMMIT_AUTHOR}\n> TAG: ${DRONE_BUILD_CREATED}\n> STATUS: 构建失败"
-    when:
-      status:
         - failure
+
 
 # 挂载的目录
 # 缓存go-build($GOCACHE)路径
